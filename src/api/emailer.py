@@ -283,6 +283,18 @@ class Emailer:
         self.receiver = config.RECEIVER_EMAIL
 
     def send(self, items: list[dict]) -> bool:
+        if len(items) > 5:
+            total_batches = (len(items) + 4) // 5
+            print(f"[Emailer] Splitting {len(items)} lecture(s) into {total_batches} email(s).")
+            sent_all = True
+            for start in range(0, len(items), 5):
+                batch_number = start // 5 + 1
+                batch = items[start:start + 5]
+                print(f"[Emailer] Sending batch {batch_number}/{total_batches} ({len(batch)} lecture(s)).")
+                sent_all = self.send(batch) and sent_all
+            return sent_all
+
+
         """Send a single email containing all lecture summaries.
 
         LaTeX formulas are rendered as PNG images and embedded directly into
